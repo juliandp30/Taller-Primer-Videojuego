@@ -29,6 +29,10 @@ window.addEventListener("load", setCanvasSize);
 let canvasSize;
 // Variable para cada cuadrado interior del canvas
 let elementSize;
+// Variable que guarda el nivel
+let level = 0;
+// Variable que guarde las vigas
+let lives = 3;
 
 // Variable para guardar la posicion del jugador
 let playerPosition = {
@@ -36,35 +40,33 @@ let playerPosition = {
   y: undefined,
 };
 
+// Variable para guardar la posicion del objetivo
+let giftPosition = {
+  x: undefined,
+  y: undefined,
+};
+
+// Lista para almacenar las posiciones de las bombas
+let bombPosition = [];
+
 // Cuando se modifique el tamaño de la ventana ('load') se ejecuta la funcion
 window.addEventListener("resize", setCanvasSize);
 
 // Funcion para inicializar el juego
 function startGame() {
-  /*
-  Metodos para los canvas
-
-  // Insertar un rectangulo
-  // cordx_ini, cordy_ini, width, heigth
-  // El eje x es el horizontal en canvas y se recorre de izquierda a derecha
-  // El eje y es el vertical en canvas y se recorre de arriba hacia abajo
-  game.fillRect(0, 0, 100, 50);
-  // Crear un borrador de rectangulo (mismo parametros)
-  game.clearRect(0, 0, 50, 50);
-
-  // Atributos para el estilo dentro del canvas
-  game.font = "25px Verdana"; 
-  game.fillStyle = "purple";
-  game.textAlign = "center";
-
-  */
-
   // Tamaño de fuente para aplicar a los elementos
   game.font = elementSize * 0.5 + "px Verdana";
   game.textAlign = "center";
 
   // Se trae el mapa
-  const map = maps[1];
+  const map = maps[level];
+
+  // Si no hay mapa no hace nada
+  if (!map) {
+    gameWin();
+    return;
+  }
+
   // Con el metodo trim de string se quitan espacios al inicial y al final
   // y con el split se divide por caracter
   // Luego se hace un map de lo mismo (quitar espacios y dividir por caracter)
@@ -76,6 +78,9 @@ function startGame() {
   // Se borra todo lo que haya en el canvas
   // cordx_ini, cordy_ini, width, heigth
   game.clearRect(0, 0, canvasSize, canvasSize);
+
+  // Se limpia la posicion de las bombas
+  bombPosition = [];
 
   // Usando for each para reducir lineas de codigo
   // cuando se reciben dos parametros, el primero es el elmento del array y el segundo es el indice
@@ -92,6 +97,11 @@ function startGame() {
       if (emoji === "O" && !playerPosition.x && !playerPosition.y) {
         playerPosition.x = posX;
         playerPosition.y = posY;
+      } else if (emoji === "I") {
+        giftPosition.x = posX;
+        giftPosition.y = posY;
+      } else if (emoji === "X") {
+        bombPosition.push([posX, posY]);
       }
     });
   });
@@ -131,13 +141,57 @@ function moveByKeys(event) {
   else if (event.key == "ArrowRight") moveRight();
 }
 
+function nextLevel() {
+  console.log("Siguiente nivel");
+  level++;
+  startGame();
+}
+
+function gameWin() {
+  console.log("terminaste el juego");
+}
+
+function gameFail() {
+  if (lives <= 1) {
+    level = 0;
+    lives = 3;
+  } else {
+    lives--;
+  }
+  playerPosition.x = undefined;
+  playerPosition.y = undefined;
+  startGame();
+}
+
+function reviewPlayerPosition() {
+  // Colision con el regalo
+  if (
+    playerPosition.x.toFixed(3) == giftPosition.x.toFixed(3) &&
+    playerPosition.y.toFixed(3) == giftPosition.y.toFixed(3)
+  ) {
+    nextLevel();
+  }
+  // Colision con las bombas
+  if (
+    bombPosition.some(
+      (posic) =>
+        posic[0].toFixed(3) == playerPosition.x.toFixed(3) &&
+        posic[1].toFixed(3) == playerPosition.y.toFixed(3)
+    )
+  ) {
+    gameFail();
+  }
+}
+
 function movePlayer() {
   // Se dibuja el emoji del jugador
   game.fillText(emojis["PLAYER"], playerPosition.x, playerPosition.y);
+  // Se revisa la posicion del jugador
+  reviewPlayerPosition();
 }
 
 function moveUp() {
-  if (playerPosition.y - elementSize > elementSize * 0.5) {
+  if (playerPosition.y - elementSize + 1e-3 > elementSize * 0.5) {
     playerPosition.y -= elementSize;
     // Se vuelve a cargar el juego para borrar el emoji de la posición anterior
     startGame();
@@ -145,7 +199,7 @@ function moveUp() {
 }
 
 function moveDown() {
-  if (playerPosition.y + elementSize < canvasSize) {
+  if (playerPosition.y + elementSize - 1e-3 < canvasSize) {
     playerPosition.y += elementSize;
     // Se vuelve a cargar el juego para borrar el emoji de la posición anterior
     startGame();
@@ -153,7 +207,7 @@ function moveDown() {
 }
 
 function moveLeft() {
-  if (playerPosition.x - elementSize > elementSize * 0.5) {
+  if (playerPosition.x - elementSize + 1e-3 > elementSize * 0.5) {
     playerPosition.x -= elementSize;
     // Se vuelve a cargar el juego para borrar el emoji de la posición anterior
     startGame();
@@ -161,7 +215,7 @@ function moveLeft() {
 }
 
 function moveRight() {
-  if (playerPosition.x + elementSize < canvasSize) {
+  if (playerPosition.x + elementSize - 1e-3 < canvasSize) {
     playerPosition.x += elementSize;
     // Se vuelve a cargar el juego para borrar el emoji de la posición anterior
     startGame();
