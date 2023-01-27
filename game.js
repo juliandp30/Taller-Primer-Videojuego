@@ -10,6 +10,8 @@ const btnRight = document.querySelector("#right");
 // Parrafos
 const spanLives = document.querySelector("#lives");
 const spanTime = document.querySelector("#time");
+const spanRecord = document.querySelector("#record");
+const pResult = document.querySelector("#result");
 
 // Se agregan listeneres de eventos cuando se de click en los botones
 btnUp.addEventListener("click", moveUp);
@@ -78,7 +80,7 @@ function startGame() {
 
   // Si no hay mapa no hace nada
   if (!map) {
-    gameWin();
+    gameWinAndRecords();
     return;
   }
 
@@ -86,6 +88,7 @@ function startGame() {
   if (!timeStart) {
     timeStart = Date.now();
     timeInterval = setInterval(showTime, 100);
+    showRecord();
   }
 
   // Se muestran las vidas
@@ -171,9 +174,24 @@ function nextLevel() {
   startGame();
 }
 
-function gameWin() {
+function gameWinAndRecords() {
   console.log("terminaste el juego");
   clearInterval(timeInterval);
+
+  const recordTime = localStorage.getItem("record_time");
+  const playerTime = Date.now() - timeStart;
+
+  if (recordTime) {
+    if (recordTime >= playerTime) {
+      localStorage.setItem("record_time", playerTime);
+      pResult.innerHTML = ('Felicidades! Superaste el record')
+    } else {
+      pResult.innerHTML = ('Lo siento!, no superaste el record')
+    }
+  } else {
+    localStorage.setItem("record_time", playerTime);
+    pResult.innerHTML('¿Primera vez jugando? Intenta superar el record')
+  }
 }
 
 function gameFail() {
@@ -187,6 +205,10 @@ function gameFail() {
   playerPosition.x = undefined;
   playerPosition.y = undefined;
   startGame();
+}
+
+function showRecord() {
+  spanRecord.innerHTML = localStorage.getItem("record_time");
 }
 
 function showLivesLeft() {
@@ -290,4 +312,21 @@ function moveRight() {
  Dentro de los superprototipos de JS hay metodos para calcular fechas
  Date.now() nos devuelve la fecha del tiempo en milisegundos
 
+*/
+
+/*
+ Local Storage --- OJO: Esto solo funciona cuando se ejecuta dentro
+ del navegador. No cuando se ejecuta como back end por ejemplo con Node.js
+
+ Con el local storage se le dice al navegador que guarde informacion dentro
+ del navegador y que no se borre cada vez que se recargue la pagina, o el navegador
+ o que se cierre o que vuelva dentor de un mes.
+
+ Esto solo funciona en el navegador donde se haya abierto la pagina (no pasa por ejemplo
+ de chrome a firefox)
+ 
+ localStorage tiene metodos:
+  - para guardar por primera vez algo se usa setItem
+  - para traer algo del localStorage se usa getItem
+  - para eliminar algo del localStorage se usa removeItem
 */
