@@ -150,6 +150,10 @@ function setCanvasSize() {
   // Cuadrado interior del canvas
   elementSize = canvasSize / 10;
 
+  // Se reinicia la posicion de la calavera
+  playerPosition.x = undefined;
+  playerPosition.y = undefined;
+
   // Cada que se modifica el tamaño, se renderiza el juego
   startGame();
 
@@ -184,13 +188,13 @@ function gameWinAndRecords() {
   if (recordTime) {
     if (recordTime >= playerTime) {
       localStorage.setItem("record_time", playerTime);
-      pResult.innerHTML = ('Felicidades! Superaste el record')
+      pResult.innerHTML = "Felicidades! Superaste el record";
     } else {
-      pResult.innerHTML = ('Lo siento!, no superaste el record')
+      pResult.innerHTML = "Lo siento!, no superaste el record";
     }
   } else {
     localStorage.setItem("record_time", playerTime);
-    pResult.innerHTML('¿Primera vez jugando? Intenta superar el record')
+    pResult.innerHTML("¿Primera vez jugando? Intenta superar el record");
   }
 }
 
