@@ -7,6 +7,10 @@ const btnDown = document.querySelector("#down");
 const btnLeft = document.querySelector("#left");
 const btnRight = document.querySelector("#right");
 
+// Parrafos
+const spanLives = document.querySelector("#lives");
+const spanTime = document.querySelector("#time");
+
 // Se agregan listeneres de eventos cuando se de click en los botones
 btnUp.addEventListener("click", moveUp);
 btnDown.addEventListener("click", moveDown);
@@ -33,6 +37,12 @@ let elementSize;
 let level = 0;
 // Variable que guarde las vigas
 let lives = 3;
+// Variable que guarda el tiempo de inciio
+let timeStart;
+// Vairable que guarda el tiempo del jugador
+let timePlayer;
+// Vairable que guarda el intervalo de tiempo transcurrido
+let timeInterval;
 
 // Variable para guardar la posicion del jugador
 let playerPosition = {
@@ -52,6 +62,11 @@ let bombPosition = [];
 // Cuando se modifique el tamaño de la ventana ('load') se ejecuta la funcion
 window.addEventListener("resize", setCanvasSize);
 
+// Funcion que calcula el tiempo transcurrido
+function showTime() {
+  spanTime.innerHTML = Date.now() - timeStart;
+}
+
 // Funcion para inicializar el juego
 function startGame() {
   // Tamaño de fuente para aplicar a los elementos
@@ -66,6 +81,15 @@ function startGame() {
     gameWin();
     return;
   }
+
+  // Si el tiempo de inciio ya tiene algun valor
+  if (!timeStart) {
+    timeStart = Date.now();
+    timeInterval = setInterval(showTime, 100);
+  }
+
+  // Se muestran las vidas
+  showLivesLeft();
 
   // Con el metodo trim de string se quitan espacios al inicial y al final
   // y con el split se divide por caracter
@@ -149,18 +173,37 @@ function nextLevel() {
 
 function gameWin() {
   console.log("terminaste el juego");
+  clearInterval(timeInterval);
 }
 
 function gameFail() {
   if (lives <= 1) {
     level = 0;
     lives = 3;
+    timeStart = undefined;
   } else {
     lives--;
   }
   playerPosition.x = undefined;
   playerPosition.y = undefined;
   startGame();
+}
+
+function showLivesLeft() {
+  /*
+  JS tiene algo que se llama superprototipos
+  que son metodos que tiene JS para generar objetos
+  Se crea un array con el numero de posiciones de la varibale vidas
+  y el con el fill se llena con la variable
+  
+  const livesArray = Array(lives).fill(emojis["HEART"]);
+  spanLives.innerHTML = ""
+  livesArray.forEach(heart => spanLives.append(heart))
+
+  */
+
+  // Una solucion mucho mejor seria una el metodo repeat de los strings
+  spanLives.innerHTML = emojis["HEART"].repeat(lives);
 }
 
 function reviewPlayerPosition() {
@@ -221,3 +264,30 @@ function moveRight() {
     startGame();
   }
 }
+
+/*
+ JS tiene unos metodos para ejecutar codigo cada cierto tiempo
+
+ setInterval es un metodo para ejecutar cierto codigo cada intervalo
+ de tiempo especificado en milisegundos
+
+ setInterval(funcion, intervalo_tiempo)
+ por ejemplo: setInterval(() => console.log('Hola'), 1000)
+
+ para detener la funcion de setInterval, se asigna a una variable el
+ metodo y se pasa por otro metodo: clearInterval(variable)
+
+ por ejemplo:
+ const imprimirHola = setInterval(() => console.log('Hola'), 1000)
+ clearInterval(imprimirHola) 
+
+ setTimeOut es un metodo para ejecutar cierto codigo una vez luego de que
+ haya pasado un tiempo especificado en milisegundos
+
+ setTimeOut(funcion, intervalo_tiempo)
+ por ejemplo: setTimeOut(() => console.log('Hola'), 1000)
+
+ Dentro de los superprototipos de JS hay metodos para calcular fechas
+ Date.now() nos devuelve la fecha del tiempo en milisegundos
+
+*/
